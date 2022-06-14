@@ -70,3 +70,5 @@ def remove_background(img, gray_image, whiteBackground):
     plt.imshow(foreground_image, cmap='binary_r')
     
     plt.show()
+    
+    return foreground_image

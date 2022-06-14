@@ -68,6 +68,14 @@ plt.imshow(gaussianBlur_img3, cmap='gray')
 plt.show()
 
 # RESPONSÁVEL EM REMOVER O FUNDO DA IMAGEM.
-b.remove_background(img, gaussianBlur_img, False)
-b.remove_background(img2, gaussianBlur_img2, True)
-b.remove_background(img3, gaussianBlur_img3, False)
+noBackground_image1 = b.remove_background(img, gaussianBlur_img, False)
+noBackground_image2 = b.remove_background(img2, gaussianBlur_img2, True)
+noBackground_image3 = b.remove_background(img3, gaussianBlur_img3, False)
+
+noBackground_image1 = cv.cvtColor(noBackground_image1, cv.COLOR_RGB2BGR)
+noBackground_image2 = cv.cvtColor(noBackground_image2, cv.COLOR_RGB2BGR)
+noBackground_image3 = cv.cvtColor(noBackground_image3, cv.COLOR_RGB2BGR)
+
+cv.imwrite('output_images/bolhas_result.png', noBackground_image1)
+cv.imwrite('output_images/coins-01_result.jpg', noBackground_image2)
+cv.imwrite('output_images/rice_result.png', noBackground_image3)

@@ -3,7 +3,6 @@
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
-from queue import Queue
 
 # ALGORITMO DE ROTULAGEM DE COMPONENTES CONECTADOS - MÉTODO DE BUSCA POR LARGURA
 # - ENTRADA:    IMAGEM LIMIARIZADA;

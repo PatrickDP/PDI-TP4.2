@@ -64,10 +64,9 @@ def labeling_breadthSearch(thresh_img):
                         if(label_img[q] == 255):
                             label_img[q] = label
                             queue.append(q)
+                            
     # print(label_img)
-    
-    cv.imshow('label_img', label_img)
-    cv.waitKey(0)
+    plt.title('label_img'), plt.axis('off'), plt.imshow(label_img, cmap='gray'), plt.show()
     
     return label_img
     

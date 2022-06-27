@@ -3,13 +3,6 @@
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
-
-def generate_histogram(img):
-    histogram = cv.calcHist([img], [0], None, [256], [0, 256])
-    
-    plt.plot(histogram)
-    plt.xlim([0, 256])
-    plt.show()
     
 def remove_background(img, gaussianBlur_img, what_img):
     mask_name = 0
@@ -62,11 +55,11 @@ def remove_background(img, gaussianBlur_img, what_img):
         bitwise_TOimg = cv.bitwise_xor(thresh_img, opening_Cimg, mask=None)
         bitwise_OBimg = cv.bitwise_or(opening_Cimg, bitwise_TOimg, mask=None)
     
-        mask_name = "coins-01_mask.jpg" 
+        mask_name = "coins-01_mask.png" 
         mask_img = bitwise_OBimg.copy()
         final_img = cv.bitwise_and(img, img, mask=bitwise_OBimg)
         
-        plt.figure('coins-01.jpg')
+        plt.figure('coins-01.png')
         
         plt.subplot(3, 3, 1), plt.title('gaussianBlur_img'), plt.axis('OFF'), plt.plot(), plt.imshow(gaussianBlur_img, cmap='gray')
         plt.subplot(3, 3, 2), plt.title('canny_img'), plt.axis('OFF'), plt.plot(), plt.imshow(canny_img, cmap='gray')

@@ -1,102 +1,60 @@
 # RESOLUÇÃO DA LETRA B
 
+from imghdr import what
 import numpy as np
-import cv2 as cv
 import matplotlib.pyplot as plt
+import cv2 as cv
     
-def remove_background(img, gaussianBlur_img, what_img):
-    mask_name = 0
-    mask_img = []
-    final_img = []
+def remove_background(img,  what_img):
+    # CASO PARA A 2A IMAGEM
+    if(what_img == 2):
+        canny_img = cv.Canny(img, 100, 0)
+        
+        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, [7, 7])
+        canny_img = cv.morphologyEx(canny_img, cv.MORPH_CLOSE, kernel, iterations=2)
+        
+        img = canny_img.copy()
+    # CASO PARA A 3A IMAGEM
+    if(what_img == 3):
+        canny_img = cv.Canny(img, 100, 113)
+        
+        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, [3, 3])
+        canny_img = cv.morphologyEx(canny_img, cv.MORPH_CLOSE, kernel, iterations=1)
+        
+        img = canny_img.copy()
     
-    # PARA O CASO DA PRIMEIRA IMAGEM (JÁ LIMIARIZADA E PRECISA APENAS DO MÉTODO CLOSING)
+    img_floodfill = img.copy()
+    height, width = img_floodfill.shape[:2]
+    mask = np.zeros((height+2, width+2), np.uint8)
+    
+    cv.floodFill(img_floodfill, mask, (0, 0), 255)
+    
+    inverse_floodFill = cv.bitwise_not(img_floodfill)    
+    
+    # APRIMORAMENTOS
     if(what_img == 1):
-        kernel = cv.getStructuringElement(cv.MORPH_RECT, [5, 1])
-        erode_img = cv.erode(img, kernel, iterations=1)
+        foreground_img = cv.bitwise_or(img, inverse_floodFill)
+    if(what_img == 2):
+        foreground_img = cv.bitwise_or(img, inverse_floodFill)
+        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, [75, 75])
+        foreground_img = cv.morphologyEx(foreground_img, cv.MORPH_OPEN, kernel, iterations=1)
         
-        kernel_2 = cv.getStructuringElement(cv.MORPH_CROSS, [25, 25])
-        closing_Eimg = cv.morphologyEx(erode_img, cv.MORPH_CLOSE, kernel_2)
-        
-        kernel_3 = cv.getStructuringElement(cv.MORPH_ELLIPSE, [7, 7])
-        erode_CEimg = cv.erode(closing_Eimg, kernel_3, iterations=1)
- 
-        bitwise_img = cv.bitwise_or(img, erode_CEimg, mask=None)
-        
-        kernel_4 = cv.getStructuringElement(cv.MORPH_RECT, [1, 8])
-        
-        mask_name = "bolhas_mask.png"
-        final_img = cv.morphologyEx(bitwise_img, cv.MORPH_CLOSE, kernel_4)
-        mask_img = final_img.copy()
-                
-        plt.figure('bolhas.png')
-        
-        plt.subplot(2, 3, 1), plt.title('img'), plt.axis('OFF'), plt.plot(), plt.imshow(img, cmap='gray')
-        plt.subplot(2, 3, 2), plt.title('erode_img'), plt.axis('OFF'), plt.plot(), plt.imshow(erode_img, cmap='gray')
-        plt.subplot(2, 3, 3), plt.title('closing_Eimg'), plt.axis('OFF'), plt.plot(), plt.imshow(closing_Eimg, cmap='gray')
-        
-        plt.subplot(2, 3, 4), plt.title('erode_CEimg'), plt.axis('OFF'), plt.plot(), plt.imshow(erode_CEimg, cmap='gray')
-        plt.subplot(2, 3, 5), plt.title('bitwise_img'), plt.axis('OFF'), plt.plot(), plt.imshow(bitwise_img, cmap='gray')
-        plt.subplot(2, 3, 6), plt.title('final_image'), plt.axis('OFF'), plt.plot(), plt.imshow(final_img, cmap='gray')
-        
-        plt.show()      
+        kernel2 = cv.getStructuringElement(cv.MORPH_ELLIPSE, [3, 3])
+        foreground_img = cv.erode(foreground_img, kernel2, iterations=2)
+        foreground_img = cv.morphologyEx(foreground_img, cv.MORPH_OPEN, kernel)
+    if(what_img == 3):
+        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, [3, 3])
+        inverse_floodFill = cv.morphologyEx(inverse_floodFill, cv.MORPH_OPEN, kernel, iterations=2)
+        inverse_floodFill = cv.dilate(inverse_floodFill, kernel, iterations=1)
+       
+        foreground_img = inverse_floodFill.copy()
     
-    # ... SEGUNDA IMAGEM (USO DO CANNY PARA DETECTAR AS BORDAS DA MOEDA BRANCA, OP. MORFOLÓGICOS E BITWISE)
-    elif(what_img == 2):
-        canny_img = cv.Canny(gaussianBlur_img, 100, 0)
-        threshold, thresh_img = cv.threshold(gaussianBlur_img, 0, 255, cv.THRESH_OTSU + cv.THRESH_BINARY_INV)
-        bitwise_img = cv.bitwise_xor(canny_img, thresh_img, mask=None)
-        
-        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, [19, 19])
-        closing_BCimg = cv.morphologyEx(bitwise_img, cv.MORPH_CLOSE, kernel)
-        
-        kernel_2 = cv.getStructuringElement(cv.MORPH_ELLIPSE, [75, 75])
-        opening_Cimg = cv.morphologyEx(closing_BCimg, cv.MORPH_OPEN, kernel_2)
-        
-        bitwise_TOimg = cv.bitwise_xor(thresh_img, opening_Cimg, mask=None)
-        bitwise_OBimg = cv.bitwise_or(opening_Cimg, bitwise_TOimg, mask=None)
     
-        mask_name = "coins-01_mask.png" 
-        mask_img = bitwise_OBimg.copy()
-        final_img = cv.bitwise_and(img, img, mask=bitwise_OBimg)
-        
-        plt.figure('coins-01.png')
-        
-        plt.subplot(3, 3, 1), plt.title('gaussianBlur_img'), plt.axis('OFF'), plt.plot(), plt.imshow(gaussianBlur_img, cmap='gray')
-        plt.subplot(3, 3, 2), plt.title('canny_img'), plt.axis('OFF'), plt.plot(), plt.imshow(canny_img, cmap='gray')
-        plt.subplot(3, 3, 3), plt.title('thresh_img'), plt.axis('OFF'), plt.plot(), plt.imshow(thresh_img, cmap='gray')
-        
-        plt.subplot(3, 3, 4), plt.title('bitwise_img'), plt.axis('OFF'), plt.plot(), plt.imshow(bitwise_img, cmap='gray')
-        plt.subplot(3, 3, 5), plt.title('closing_img'), plt.axis('OFF'), plt.plot(), plt.imshow(closing_BCimg, cmap='gray')
-        plt.subplot(3, 3, 6), plt.title('opening_img'), plt.axis('OFF'), plt.plot(), plt.imshow(opening_Cimg, cmap='gray')
-        
-        plt.subplot(3, 3, 7), plt.title('bitwise_TOimg'), plt.axis('OFF'), plt.plot(), plt.imshow(bitwise_TOimg, cmap='gray')
-        plt.subplot(3, 3, 8), plt.title('bitwise_OBimg'), plt.axis('OFF'), plt.plot(), plt.imshow(bitwise_OBimg, cmap='gray')
-        plt.subplot(3, 3, 9), plt.title('final_img'), plt.axis('OFF'), plt.plot(), plt.imshow(final_img, cmap='gray')
-        
-        plt.show()
-    # ... TERCEIRA IMAGEM (USANDO LIMIAR ADAPTATIVO E O MÉTODO OPENING)
-    elif(what_img == 3):
-        thresh_img = cv.adaptiveThreshold(gaussianBlur_img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 199, 3)
-        
-        kernel = cv.getStructuringElement(cv.MORPH_CROSS, [3, 3])
-        opening_img = cv.morphologyEx(thresh_img, cv.MORPH_OPEN, kernel)
-        
-        mask_name = "rice_mask.png"
-        mask_img = opening_img.copy()
-        final_img = cv.bitwise_and(img, img, mask=opening_img)
-        
-        plt.figure('rice.png')
-        
-        plt.subplot(2, 2, 1), plt.title('gaussianBlur_img'), plt.axis('OFF'), plt.plot(), plt.imshow(gaussianBlur_img, cmap='gray')
-        plt.subplot(2, 2, 2), plt.title('thresh_img'), plt.axis('OFF'), plt.plot(), plt.imshow(thresh_img, cmap='gray')
-        
-        plt.subplot(2, 2, 3), plt.title('opening_img'), plt.axis('OFF'), plt.plot(), plt.imshow(opening_img, cmap='gray')
-        plt.subplot(2, 2, 4), plt.title('final_img'), plt.axis('OFF'), plt.plot(), plt.imshow(final_img, cmap='gray')
-        
-        plt.show()
-    else:
-        print('ERROR - RETURNING FUNCTION...')
-        return
-    
-    cv.imwrite('output_images/%s' %(mask_name), mask_img)
-    return final_img
+    plt.subplot(2, 2, 1), plt.title('1'), plt.axis('OFF'), plt.imshow(img, cmap='gray')
+    plt.subplot(2, 2, 2), plt.title('2'), plt.axis('OFF'), plt.imshow(img_floodfill, cmap='gray')
+    plt.subplot(2, 2, 3), plt.title('3'), plt.axis('OFF'), plt.imshow(inverse_floodFill, cmap='gray')
+    plt.subplot(2, 2, 4), plt.title('4'), plt.axis('OFF'), plt.imshow(foreground_img, cmap='gray')
+
+    plt.show()
+
+    return foreground_img

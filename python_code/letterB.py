@@ -1,6 +1,5 @@
-# RESOLUÇÃO DA LETRA B
+# LETRA B: REMOVE O FUNDO DA IMAGEM
 
-from imghdr import what
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2 as cv

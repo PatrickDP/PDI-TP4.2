@@ -1,4 +1,4 @@
-# RESOLUÇÃO DA LETRA C
+# LETRA C: FAZ A ROTULAGEM DE COMPONENTES CONECTADOS
 
 import numpy as np
 import matplotlib.pyplot as plt

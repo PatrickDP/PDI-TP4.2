@@ -68,7 +68,7 @@ cv.imwrite('output_images/gaussianBlur_coins-01.png', gaussianBlur_img2)
 cv.imwrite('output_images/gaussianBlur_rice.png', gaussianBlur_img3)
 
 # LETRA B:
-cv.imwrite('output_images/coins-01_mask.png', thresh_img3)
+cv.imwrite('output_images/coins-01_mask.png', thresh_img2)
 cv.imwrite('output_images/rice_mask.png', thresh_img3)
 
 # LETRA C:
